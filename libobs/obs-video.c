@@ -388,12 +388,14 @@ static inline void queue_frame(struct obs_core_video *video, bool raw_active,
 		struct obs_vframe_info *vframe_info, int prev_texture)
 {
 	if (!video->gpu_encoder_avail_queue.size) {
-		struct obs_tex_frame *tf = circlebuf_data(
+		if (video->gpu_encoder_queue.size) {
+			struct obs_tex_frame *tf = circlebuf_data(
 				&video->gpu_encoder_queue,
 				video->gpu_encoder_queue.size - sizeof(*tf));
 
-		tf->count++;
-		os_sem_post(video->gpu_encode_semaphore);
+			tf->count++;
+			os_sem_post(video->gpu_encode_semaphore);
+		}
 		return;
 	}
 
